@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+	<meta charset="utf-8" />
+	<title>Sexvergnügen Podcast (2016-2017)</title>
+
+	<style>
+		* { box-sizing: border-box; }
+
+		html {
+			font: 100%/1.4 -system-ui, sans-serif;
+		}
+
+		body {
+			margin: 1.5em;
+		}
+
+		h1 { font-size: 2rem; }
+		h2 { font-size: 1.25rem; }
+
+		#main {
+			display: flex;
+			flex-direction: column;
+			gap: 1.5em;
+		}
+
+		#main > * {
+			flex-basis: 100%;
+			border: 1px solid #eee;
+			padding: 0.25em 1em;
+		}
+
+		#episodes {
+			padding: 0;
+			margin-bottom: 0.75em;
+		}
+
+		#episodes li {
+			list-style: inside decimal-leading-zero;
+			border-bottom: 1px solid #eee;
+			padding-left: 0.5em;
+		}
+
+		#episodes li:last-child { border-bottom: 0; }
+
+		#episodes li a {
+			display: inline-block;
+			text-decoration: none;
+			padding: 0.5em 0;
+			color: currentColor;
+		}
+
+		#episodes li.active {
+			background-color: #f4f4f4;
+		}
+
+		#episodes li a:hover {
+			text-decoration: underline;
+		}
+
+		#episode-info p {
+			max-width: 70ch;
+		}
+		
+		p:empty { display: none; }
+
+		@media (min-width: 55em) {
+			#main {
+				flex-direction: row;
+			}
+
+			#main > * {
+				flex: 1 1 50%;
+			}
+		}
+	</style>
+</head>
+<body>
+	<div id="main">
+		<section id="intro">
+			<h1>Sexvergügen</h1>
+
+			<img src="https://www.dropbox.com/sh/f9ui3myvtkk1jts/AAAnrTrQiv6uR-l7ZOm8AAzda/title.jpg?raw=1" alt="" width="200" height="200" />
+
+			<p>Seit 2016 plaudern Leila Lowfire und Ines Anioli nun schon erfolgreich über die schönste Nebensache der Welt. Früher noch unter dem Namen „Sexvergnügen“, seit 2018 als „Besser als Sex“, unterhalten die beiden einmal die Woche über 250.000 Hörer und Hörerinnen mit Anekdoten, Fragen und Diskussionen über Sex, Liebe und Beziehungen.</p>
+
+			<h2>Folgen</h2>
+			<ol id="episodes"></ol>
+		</section>
+
+		<section id="episode-info">
+			<h2>x</h2>
+			<time datetime="">00.00.0000</time>
+
+			<p><img src="" alt="" width="200" height="200" /></p>
+
+			<div class="description">x</div>
+			
+			<audio src="" preload="metadata" controls></audio>
+			<p class="duration">x</p>
+		</section>
+	</div>
+
+	<script type="module">
+
+		const makeEpisodeList = function (ele, episodes) {
+
+			for (let i=0; i<episodes.length; i++) {
+				const li = document.createElement('li');
+				li.setAttribute('data-episode-id', i+1);
+
+				const a = document.createElement('a');
+				a.setAttribute('href', '#'+(i+1));
+				a.addEventListener('click', function (e) {
+					window.location.hash = '#'+(i+1);
+					window.location.reload();
+				});
+				a.textContent = episodes[i].title;
+
+				li.appendChild(a);
+
+				if (ele) {
+					ele.appendChild(li);
+				}
+			}
+		}
+
+		const displayEpisodeInfo = function (episode) {
+			const dom = {
+				'title': document.querySelector('#episode-info h2'),
+				'description': document.querySelector('#episode-info .description'),
+				'duration': document.querySelector('#episode-info .duration'),
+				'date': document.querySelector('#episode-info time'),
+				'url': document.querySelector('#episode-info h2'),
+				'audio': document.querySelector('#episode-info audio'),
+			}
+
+			// time
+			var episodeDate = new Date(episode.datetime);
+			let format = new Intl.DateTimeFormat('de');
+			dom.date.textContent = 'Datum: ' + format.format(episodeDate);
+			dom.date.setAttribute('datetime', episode.datetime);
+			
+			// title
+			dom.title.textContent = episode.title;
+
+			// description
+			dom.description.innerHTML = '<p>' + episode.description.replaceAll('\\n', '</p><p>') + '</p>';
+
+			// duration
+			dom.duration.textContent = 'Dauer: ' + episode.duration;
+			
+			// audio
+			dom.audio.setAttribute('src', episode.file);
+			dom.audio.setAttribute('type', episode.type);
+		}
+
+		fetch('./episodes.json')
+			.then(function (response) {
+				return response.json()
+			})
+			.then(function (episodes) {
+
+				if (episodes.length < 1) return;
+
+				makeEpisodeList(document.querySelector('#episodes'), episodes);
+
+				if(window.location.hash) {
+					const hash = window.location.hash.substring(1);
+
+					if (episodes[hash-1]) {
+
+						// highlight episode in list
+						document.querySelector('#episodes li[data-episode-id="'+(hash)+'"]').classList.add('active');
+
+						displayEpisodeInfo(episodes[hash-1]);
+					}
+				} else {
+					document.querySelector('#episode-info').style.visibility = 'hidden';
+				}
+			});
+	</script>
+</body>
+</html>
