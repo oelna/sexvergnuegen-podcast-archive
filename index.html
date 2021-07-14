@@ -92,7 +92,7 @@
 			<h2>x</h2>
 			<time datetime="">00.00.0000</time>
 
-			<p><img src="" alt="" width="200" height="200" /></p>
+			<p><img class="episode-artwork" src="" alt="" width="200" height="200" /></p>
 
 			<div class="description">x</div>
 			
@@ -132,6 +132,7 @@
 				'duration': document.querySelector('#episode-info .duration'),
 				'date': document.querySelector('#episode-info time'),
 				'url': document.querySelector('#episode-info h2'),
+				'artwork': document.querySelector('#episode-info .episode-artwork'),
 				'audio': document.querySelector('#episode-info audio'),
 			}
 
@@ -153,6 +154,9 @@
 			// audio
 			dom.audio.setAttribute('src', episode.file);
 			dom.audio.setAttribute('type', episode.type);
+
+			// image
+			dom.artwork.setAttribute('src', episode.image);
 		}
 
 		fetch('./episodes.json')
