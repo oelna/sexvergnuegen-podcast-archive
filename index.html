@@ -148,6 +148,9 @@
 				'artwork': document.querySelector('#episode-info .episode-artwork'),
 				'audio': document.querySelector('#episode-info audio'),
 			}
+			
+			// set document title
+			document.title = episode.title + ' - ' + document.title;
 
 			// time
 			var episodeDate = new Date(episode.datetime);
