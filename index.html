@@ -72,6 +72,14 @@
 		
 		p:empty { display: none; }
 
+		.feed-links {
+			list-style: none;
+			padding: 0;
+			display: flex;
+			gap: 0.2em;
+		}
+
+		.feed-links a,
 		.label {
 			display:  inline-block;
 			color: #fff;
@@ -101,8 +109,14 @@
 
 			<p>Seit 2016 plaudern Leila Lowfire und Ines Anioli nun schon erfolgreich über die schönste Nebensache der Welt. Früher noch unter dem Namen „Sexvergnügen“, seit 2018 als „Besser als Sex“, unterhalten die beiden einmal die Woche über 250.000 Hörer und Hörerinnen mit Anekdoten, Fragen und Diskussionen über Sex, Liebe und Beziehungen.</p>
 
-			<p><a href="https://gist.githubusercontent.com/oelna/ea4fb932e25c2d4fee90e7ebeb2d0fae/raw/4f5448a6f98c269c30734a1cc56036ec4a1514ca/feed.xml" class="label">RSS Feed</a></p>
-
+			<ul class="feed-links">
+				<li><a href="https://oelna.github.io/sexvergnuegen-podcast-archive/feed.xml">RSS Feed</a></li>
+				<li><a href="overcast://x-callback-url/add?url=https%3A%2F%2Foelna.github.io%2Fsexvergnuegen-podcast-archive%2Ffeed.xml">Overcast</a></li>
+				<li><a href="pktc://subscribe/oelna.github.io/sexvergnuegen-podcast-archive/feed.xml">Pocket Casts</a></li>
+				<li><a href="podcast://oelna.github.io/sexvergnuegen-podcast-archive/feed.xml">Apple Podcasts</a></li>
+				<li><a href="https://podcasts.google.com/subscribe-by-rss-feed?feed=https%3A%2F%2Foelna.github.io%2Fsexvergnuegen-podcast-archive%2Ffeed.xml">Google Podcasts</a></li>
+			</ul>
+			
 			<h2>Folgen</h2>
 			<ol id="episodes"></ol>
 		</section>
