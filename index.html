@@ -123,11 +123,7 @@
 				li.setAttribute('data-episode-id', i+1);
 
 				const a = document.createElement('a');
-				a.setAttribute('href', '#'+(i+1));
-				a.addEventListener('click', function (e) {
-					window.location.hash = '#'+(i+1);
-					window.location.reload();
-				});
+				a.setAttribute('href', '?episode='+(i+1));
 				a.textContent = episodes[i].title;
 
 				li.appendChild(a);
@@ -185,15 +181,17 @@
 
 				makeEpisodeList(document.querySelector('#episodes'), episodes);
 
-				if(window.location.hash) {
-					const hash = window.location.hash.substring(1);
+				const params = new URLSearchParams(window.location.search);
 
-					if (episodes[hash-1]) {
+				if(params.get('episode') !== null) {
+					const episodeID = parseInt(params.get('episode'));
+
+					if (episodes[episodeID-1]) {
 
 						// highlight episode in list
-						document.querySelector('#episodes li[data-episode-id="'+(hash)+'"]').classList.add('active');
+						document.querySelector('#episodes li[data-episode-id="'+episodeID+'"]').classList.add('active');
 
-						displayEpisodeInfo(episodes[hash-1]);
+						displayEpisodeInfo(episodes[episodeID-1]);
 					}
 				} else {
 					document.querySelector('#episode-info').style.visibility = 'hidden';
