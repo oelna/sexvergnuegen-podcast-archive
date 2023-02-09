@@ -3,9 +3,9 @@
 <head>
 	<meta charset="utf-8" />
 	<title>Sexvergnügen Podcast (2016-2017)</title>
-	
+
 	<base href="https://oelna.github.io/sexvergnuegen-podcast-archive/" />
-	
+
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
 	<meta name="google-site-verification" content="yk63vWvDZvIQg_ABPdAuQSH9SAD49jlNwhQUSfExrp4" />
 	
@@ -69,8 +69,22 @@
 		#episode-info p {
 			max-width: 70ch;
 		}
+
+		#episode-info audio {
+			width: 100%;
+		}
+
+		#episode-info .subtitles {
+			margin-top: 1em;
+			border-top: 1px solid #eee;
+			padding-top: 0.5em;
+		}
 		
 		p:empty { display: none; }
+
+		#episode-transcript {
+			display: none;
+		}
 
 		.feed-links {
 			list-style: none;
@@ -80,7 +94,12 @@
 		}
 
 		.feed-links a,
-		.label {
+		.label,
+		button {
+			-webkit-appearance: none;
+			border: 0;
+			font-size: 1rem;
+			line-height: 1.4;
 			display:  inline-block;
 			color: #fff;
 			background-color: #000;
@@ -103,7 +122,7 @@
 <body>
 	<div id="main">
 		<section id="intro">
-			<h1>Sexvergügen</h1>
+			<h1>Sexvergnügen</h1>
 
 			<img src="https://www.dropbox.com/sh/f9ui3myvtkk1jts/AAAnrTrQiv6uR-l7ZOm8AAzda/title.jpg?raw=1" alt="" width="200" height="200" />
 
@@ -121,6 +140,14 @@
 			<ol id="episodes"></ol>
 		</section>
 
+		<section id="episode-transcript">
+			<h2>x</h2>
+
+			<p><button class="close">Folgen-Info</button></p>
+
+			<div class="transcript-content">Kein Transcript verfügbar.</div>
+		</section>
+
 		<section id="episode-info">
 			<h2>x</h2>
 			<time datetime="">00.00.0000</time>
@@ -128,13 +155,29 @@
 			<p><img class="episode-artwork" src="" alt="" width="200" height="200" /></p>
 
 			<div class="description">x</div>
-			
-			<audio src="" preload="metadata" controls></audio>
+
+			<p class="transcript"><a href="" class="label">Transcript</a></p>
+
 			<p class="duration">x</p>
+			
+			<audio preload="metadata" controls>
+				<source src="" type="" />
+				<track src="" srclang="de" label="German Captions" kind="subtitles" default></track>
+				Your browser does not support the audio tag. <a href="" download>Download the file.</a>
+			</audio>
+
+			<div class="subtitles">x</div>
 		</section>
 	</div>
 
 	<script type="module">
+
+		const siteURL = document.location.href.split('#')[0].split('?')[0];
+		const currentEpisode = function () {
+			const ep = document.querySelector('#episodes .active');
+			if (ep) return ep.getAttribute('data-episode-id');
+			return false;
+		}
 
 		const makeEpisodeList = function (ele, episodes) {
 
@@ -143,7 +186,7 @@
 				li.setAttribute('data-episode-id', i+1);
 
 				const a = document.createElement('a');
-				a.setAttribute('href', '?episode='+(i+1));
+				a.setAttribute('href', siteURL + '?episode='+(i+1));
 				a.textContent = episodes[i].title;
 
 				li.appendChild(a);
@@ -154,7 +197,47 @@
 			}
 		}
 
-		const displayEpisodeInfo = function (episode) {
+		const displayTranscript = function (episode, episodeIndex) {
+
+			const transcriptContainer = document.querySelector('#episode-transcript');
+
+			transcriptContainer.querySelector('button.close').setAttribute('data-episode', episodeIndex);
+
+			let basename = episode.file.split('/').pop().split('#')[0].split('?')[0];
+			basename = basename.substring(0, basename.lastIndexOf('.')) || basename;
+
+			const transcriptURL = siteURL + 'transcripts/' + basename + '.vtt';
+
+			fetch(transcriptURL)
+			.then(function (response) {
+				if (!response.ok) {
+					throw new Error('404', { cause: response });
+				} else {
+					return response.text();
+				}
+			})
+			.then(function (transcript) {
+
+				const lines = transcript.split("\n");
+
+				let output = '';
+				for (const line of lines) {
+					if (line.startsWith('WEBVTT')) continue;
+					if (line[2] === ':' && line[5] === ':') continue;
+					if (!isNaN(line)) continue;
+
+					output += '<p>' + line + '</p>';
+				}
+
+				transcriptContainer.querySelector('.transcript-content').innerHTML = output;
+			})
+			.catch(function (error) {
+				console.error('no transcript found', error);
+				transcriptContainer.querySelector('.transcript-content').textContent = 'Kein Transcript verfügbar.';
+			});
+		}
+
+		const displayEpisodeInfo = function (episode, episodeIndex) {
 			const dom = {
 				'title': document.querySelector('#episode-info h2'),
 				'description': document.querySelector('#episode-info .description'),
@@ -163,6 +246,9 @@
 				'url': document.querySelector('#episode-info h2'),
 				'artwork': document.querySelector('#episode-info .episode-artwork'),
 				'audio': document.querySelector('#episode-info audio'),
+				'audioLink': document.querySelector('#episode-info audio a'),
+				'transcriptLink': document.querySelector('#episode-info .transcript a'),
+				'subtitles': document.querySelector('#episode-info .subtitles'),
 			}
 			
 			// set document title
@@ -176,6 +262,7 @@
 			
 			// title
 			dom.title.textContent = episode.title;
+			document.querySelector('#episode-transcript h2').textContent = episode.title;
 
 			// description
 			dom.description.innerHTML = '<p>' + episode.description.replaceAll('\\n', '</p><p>') + '</p>';
@@ -184,12 +271,67 @@
 			dom.duration.textContent = 'Dauer: ' + episode.duration;
 			
 			// audio
-			dom.audio.setAttribute('src', episode.file);
-			dom.audio.setAttribute('type', episode.type);
+			dom.audio.querySelector('source').setAttribute('src', episode.file);
+			dom.audio.querySelector('source').setAttribute('type', episode.type);
+			dom.audioLink.setAttribute('href', episode.file);
+
+			// subtitles
+			let basename = episode.file.split('/').pop().split('#')[0].split('?')[0];
+			basename = basename.substring(0, basename.lastIndexOf('.')) || basename;
+			dom.audio.querySelector('track').setAttribute('src', siteURL + 'transcripts/' + basename + '.vtt');
+			dom.subtitles.textContent = '';
+
+			dom.transcriptLink.href = '?transcript=' + episodeIndex;
 
 			// image
 			dom.artwork.setAttribute('src', episode.image);
 		}
+
+		// listen for cue changes for subtitles
+		const subtitleContainer = document.querySelector('#episode-info .subtitles');
+		document.querySelector('#episode-info audio').textTracks[0].addEventListener('cuechange', function (e) {
+			subtitleContainer.textContent = this.activeCues[0].text;
+		});
+
+		// transcript open button
+		document.querySelector('.transcript .label').addEventListener('click', function (e) {
+			e.preventDefault();
+			document.querySelector('#episode-info').style.display = 'none';
+			document.querySelector('#episode-transcript').style.display = 'block';
+
+			const episodeID = currentEpisode();
+
+			window.history.pushState({}, "", siteURL + '#/' + episodeID + '/transcript');
+		});
+
+		// transcript close button
+		document.querySelector('.close').addEventListener('click', function (e) {
+			// window.location.href = siteURL + '?episode=' + this.getAttribute('data-episode');
+			document.querySelector('#episode-info').style.display = 'block';
+			document.querySelector('#episode-transcript').style.display = 'none';
+
+			const episodeID = currentEpisode();
+
+			window.history.pushState({}, "", siteURL + '#/' + episodeID + '');
+		});
+
+		document.querySelector('#episodes').addEventListener('click', function (e) {
+			let listItem = e.target;
+			if (e.target.tagName.toLowerCase() != 'li') {
+				listItem = e.target.closest('li');
+			}
+
+			if (listItem.getAttribute('data-episode-id')) {
+				e.preventDefault();
+				window.location.hash = '#/' + listItem.getAttribute('data-episode-id');
+				window.location.reload();
+			}
+		});
+
+		// handle back button with hash url changes
+		window.addEventListener('popstate', function (e) {
+			window.location.reload();
+		});
 
 		fetch('./episodes.json')
 			.then(function (response) {
@@ -201,20 +343,58 @@
 
 				makeEpisodeList(document.querySelector('#episodes'), episodes);
 
-				const params = new URLSearchParams(window.location.search);
+				// handle hash urls
+				if (window.location.hash.length > 1) {
+					const parts = window.location.hash.split('/');
 
-				if(params.get('episode') !== null) {
-					const episodeID = parseInt(params.get('episode'));
+					const episodeID = parseInt(parts[1]);
+					const display = (parts[2] && parts[2].toLowerCase() == 'transcript') ? 'transcript' : 'episode';
 
 					if (episodes[episodeID-1]) {
 
 						// highlight episode in list
 						document.querySelector('#episodes li[data-episode-id="'+episodeID+'"]').classList.add('active');
 
-						displayEpisodeInfo(episodes[episodeID-1]);
+						// load episode info and transcript
+						displayEpisodeInfo(episodes[episodeID-1], episodeID);
+						displayTranscript(episodes[episodeID-1], episodeID);
+
+						if (display == 'episode') {
+							document.querySelector('#episode-info').style.display = 'block';
+							document.querySelector('#episode-transcript').style.display = 'none';
+						} else {
+							document.querySelector('#episode-info').style.display = 'none';
+							document.querySelector('#episode-transcript').style.display = 'block';
+						}
 					}
 				} else {
-					document.querySelector('#episode-info').style.visibility = 'hidden';
+					// handle legacy param urls
+					const params = new URLSearchParams(window.location.search);
+
+					if(params.get('episode') !== null || params.get('transcript') !== null) {
+						
+						const display = (params.get('episode') !== null) ? 'episode' : 'transcript';
+						const episodeID = parseInt(params.get(display));
+
+						if (episodes[episodeID-1]) {
+
+							// highlight episode in list
+							document.querySelector('#episodes li[data-episode-id="'+episodeID+'"]').classList.add('active');
+
+							displayEpisodeInfo(episodes[episodeID-1], episodeID);
+							displayTranscript(episodes[episodeID-1], episodeID);
+
+							if (display == 'episode') {
+								document.querySelector('#episode-info').style.display = 'block';
+								document.querySelector('#episode-transcript').style.display = 'none';
+							} else {
+								document.querySelector('#episode-info').style.display = 'none';
+								document.querySelector('#episode-transcript').style.display = 'block';
+							}
+						}
+					} else {
+						document.querySelector('#episode-info').style.visibility = 'hidden';
+					}
 				}
 			});
 	</script>
