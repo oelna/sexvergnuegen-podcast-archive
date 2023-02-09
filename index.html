@@ -273,6 +273,7 @@
 			// audio
 			dom.audio.querySelector('source').setAttribute('src', episode.file);
 			dom.audio.querySelector('source').setAttribute('type', episode.type);
+			dom.audio.load(); // fix up Chrome
 			dom.audioLink.setAttribute('href', episode.file);
 
 			// subtitles
