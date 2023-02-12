@@ -8,9 +8,12 @@
 
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
 	<meta name="google-site-verification" content="yk63vWvDZvIQg_ABPdAuQSH9SAD49jlNwhQUSfExrp4" />
-	
+
+	<link rel="icon" href="https://oelna.github.io/sexvergnuegen-podcast-archive/favicon.ico" />
+
 	<link rel="alternate" href="./feed.xml" type="application/rss+xml" title="Podcast" />
 	<link rel="sitemap" href="./sitemap.txt" type="text/plain" title="Sitemap" />
+	<link rel="canonical" href="https://oelna.github.io/sexvergnuegen-podcast-archive/" />
 
 	<style>
 		* { box-sizing: border-box; }
@@ -79,7 +82,7 @@
 			border-top: 1px solid #eee;
 			padding-top: 0.5em;
 		}
-		
+
 		p:empty { display: none; }
 
 		#episode-transcript {
@@ -135,7 +138,7 @@
 				<li><a href="podcast://oelna.github.io/sexvergnuegen-podcast-archive/feed.xml">Apple Podcasts</a></li>
 				<li><a href="https://podcasts.google.com/subscribe-by-rss-feed?feed=https%3A%2F%2Foelna.github.io%2Fsexvergnuegen-podcast-archive%2Ffeed.xml">Google Podcasts</a></li>
 			</ul>
-			
+
 			<h2>Folgen</h2>
 			<ol id="episodes"></ol>
 		</section>
@@ -159,7 +162,7 @@
 			<p class="transcript"><a href="" class="label">Transcript</a></p>
 
 			<p class="duration">x</p>
-			
+
 			<audio preload="metadata" controls>
 				<source src="" type="" />
 				<track src="" srclang="de" label="German Captions" kind="subtitles" default></track>
@@ -250,7 +253,7 @@
 				'transcriptLink': document.querySelector('#episode-info .transcript a'),
 				'subtitles': document.querySelector('#episode-info .subtitles'),
 			}
-			
+
 			// set document title
 			document.title = episode.title + ' - ' + document.title;
 
@@ -259,7 +262,7 @@
 			let format = new Intl.DateTimeFormat('de');
 			dom.date.textContent = 'Datum: ' + format.format(episodeDate);
 			dom.date.setAttribute('datetime', episode.datetime);
-			
+
 			// title
 			dom.title.textContent = episode.title;
 			document.querySelector('#episode-transcript h2').textContent = episode.title;
@@ -269,7 +272,7 @@
 
 			// duration
 			dom.duration.textContent = 'Dauer: ' + episode.duration;
-			
+
 			// audio
 			dom.audio.querySelector('source').setAttribute('src', episode.file);
 			dom.audio.querySelector('source').setAttribute('type', episode.type);
@@ -302,6 +305,8 @@
 
 			const episodeID = currentEpisode();
 
+			document.querySelector('link[rel="canonical"]').setAttribute('href', siteURL + '#/'+episodeID+'/transcript');
+
 			window.history.pushState({}, "", siteURL + '#/' + episodeID + '/transcript');
 		});
 
@@ -312,6 +317,8 @@
 			document.querySelector('#episode-transcript').style.display = 'none';
 
 			const episodeID = currentEpisode();
+
+			document.querySelector('link[rel="canonical"]').setAttribute('href', siteURL + '#/'+episodeID);
 
 			window.history.pushState({}, "", siteURL + '#/' + episodeID + '');
 		});
@@ -363,9 +370,11 @@
 						if (display == 'episode') {
 							document.querySelector('#episode-info').style.display = 'block';
 							document.querySelector('#episode-transcript').style.display = 'none';
+							document.querySelector('link[rel="canonical"]').setAttribute('href', siteURL + '#/'+episodeID);
 						} else {
 							document.querySelector('#episode-info').style.display = 'none';
 							document.querySelector('#episode-transcript').style.display = 'block';
+							document.querySelector('link[rel="canonical"]').setAttribute('href', siteURL + '#/'+episodeID+'/transcript');
 						}
 					}
 				} else {
@@ -373,7 +382,7 @@
 					const params = new URLSearchParams(window.location.search);
 
 					if(params.get('episode') !== null || params.get('transcript') !== null) {
-						
+
 						const display = (params.get('episode') !== null) ? 'episode' : 'transcript';
 						const episodeID = parseInt(params.get(display));
 
@@ -388,9 +397,11 @@
 							if (display == 'episode') {
 								document.querySelector('#episode-info').style.display = 'block';
 								document.querySelector('#episode-transcript').style.display = 'none';
+								document.querySelector('link[rel="canonical"]').setAttribute('href', siteURL + '#/'+episodeID);
 							} else {
 								document.querySelector('#episode-info').style.display = 'none';
 								document.querySelector('#episode-transcript').style.display = 'block';
+								document.querySelector('link[rel="canonical"]').setAttribute('href', siteURL + '#/'+episodeID+'/transcript');
 							}
 						}
 					} else {
